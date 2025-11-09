@@ -33,15 +33,19 @@ client.on('messageCreate', async message => {
 
         const filter = m => m.author.id === message.author.id;
 
+        // --- STEP 1: Password Check ---
         try {
             const collectedPassword = await channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] });
-            const passwordInput = collectPassword.first();
+            // FIX 1: Corrected typo from collectPassword to collectedPassword
+            const passwordInput = collectedPassword.first(); 
 
             const userInputPassword = passwordInput.content.toLowerCase().trim();
 
-            console.log("debug log: password");
-            console.log("expected: '${PASSWORD}'");
-            console.log("recieved: '${userInputPassword}'");
+            // FIX 2: Used backticks (`) for correct template literal logging
+            console.log("--- DEBUG LOG: Password ---");
+            console.log(`expected: ${PASSWORD}`);
+            console.log(`received: ${userInputPassword}`);
+            console.log("---------------------------");
 
             if (passwordInput) {
                  try { await passwordInput.delete(); } catch (e) { console.error("couldnt delete the password :(", e); }
@@ -57,6 +61,7 @@ client.on('messageCreate', async message => {
             return channel.send("Timed out. Access denied.");
         }
 
+        // --- STEP 2: Secondary Authentication ---
         channel.send("Secondary authentication needed: What does goyim mean?");
 
         try {
@@ -65,9 +70,11 @@ client.on('messageCreate', async message => {
 
             const userInputAnswer = answerInput.content.toLowerCase().trim();
 
-            console.log("debug log: answer");
-            console.log("expected: '${ANSWER}'");
-            console.log("received: '${userInputAnswer}'");
+            // FIX 2: Used backticks (`) for correct template literal logging
+            console.log("--- DEBUG LOG: Answer ---");
+            console.log(`expected: ${ANSWER}`);
+            console.log(`received: ${userInputAnswer}`);
+            console.log("-------------------------");
 
             if (userInputAnswer !== ANSWER) {
                  return channel.send("Incorrect.");
@@ -82,18 +89,23 @@ client.on('messageCreate', async message => {
             return channel.send("Timed out.");
         }
 
+        // --- STEP 3: Final Codeword Confirmation ---
         channel.send("Send codeword for final confirmation.");
 
         try {
             const collectedCodeword = await channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] });
             const codewordInput = collectedCodeword.first();
+            
+            // Added .trim() for consistency
+            const userInputCodeword = codewordInput.content.toLowerCase().trim();
 
             if (codewordInput) {
                 try { await codewordInput.delete(); } catch (e) { console.error("couldnt delete codeword :(", e); }
             }
 
-            if (codewordInput.content.toLowercase() !== CODEWORD) {
-                return channel.send("Wrong codeword. Cancelling operation....");
+            // FIX 3: Corrected method name from toLowercase() to toLowerCase()
+            if (userInputCodeword !== CODEWORD) {
+                 return channel.send("Wrong codeword. Cancelling operation....");
             }
 
             channel.send("Nuclear warheads have been launched.");
