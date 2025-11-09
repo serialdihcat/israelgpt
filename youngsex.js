@@ -37,18 +37,24 @@ client.on('messageCreate', async message => {
             const collectedPassword = await channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] });
             const passwordInput = collectPassword.first();
 
+            const userInputPassword = passwordInput.content.toLowerCase().trim();
+
+            console.log("debug log: password");
+            console.log("expected: '${PASSWORD}'");
+            console.log("recieved: '${userInputPassword}'");
+
             if (passwordInput) {
                  try { await passwordInput.delete(); } catch (e) { console.error("couldnt delete the password :(", e); }
             }
 
-            if (passwordInput.content.toLowerCase() !== PASSWORD) {
+            if (userInputPassword !== PASSWORD) {
                  return channel.send("Access denied.");
             }
 
             channel.send("Welcome, IDF General.");
 
         } catch (error) {
-            return channel.send("Access denied.");
+            return channel.send("Timed out. Access denied.");
         }
 
         channel.send("Secondary authentication needed: What does goyim mean?");
@@ -57,7 +63,13 @@ client.on('messageCreate', async message => {
             const collectedAnswer = await channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] });
             const answerInput = collectedAnswer.first();
 
-            if (answerInput.content.toLowerCase() !== ANSWER) {
+            const userInputAnswer = answerInput.content.toLowerCase().trim();
+
+            console.log("debug log: answer");
+            console.log("expected: '${ANSWER}'");
+            console.log("received: '${userInputAnswer}'");
+
+            if (userInputAnswer !== ANSWER) {
                  return channel.send("Incorrect.");
             }
 
